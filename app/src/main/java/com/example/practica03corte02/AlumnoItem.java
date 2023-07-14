@@ -1,5 +1,6 @@
 package com.example.practica03corte02;
 
+
 public class AlumnoItem {
     private int id;
     private String textNombre;
