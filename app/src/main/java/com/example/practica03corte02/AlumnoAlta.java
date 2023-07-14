@@ -1,5 +1,6 @@
 package com.example.practica03corte02;
 
+
 import android.Manifest;
 import android.app.Activity;
 import android.content.DialogInterface;
@@ -36,7 +37,7 @@ public class AlumnoAlta extends AppCompatActivity {
     private int posicion;
 
     private AlumnosDb alumnosDba;
-    private int selectedImageResource;
+    private String selectedImagePath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,17 +52,18 @@ public class AlumnoAlta extends AppCompatActivity {
         txtGrado = (EditText) findViewById(R.id.txtGrado);
         imgAlumno = (ImageView) findViewById(R.id.imgAlumno);
         lblImagen= (TextView) findViewById(R.id.lblFoto);
-
+        btnEliminar.setEnabled(false);
         Bundle bundle = getIntent().getExtras();
         alumno = (Alumno) bundle.getSerializable("alumno");
         posicion = bundle.getInt("posicion", posicion);
-
         if (posicion >= 0) {
             alumno.setId(Aplicacion.alumnos.get(posicion).getId());
             txtMatricula.setText(alumno.getMatricula());
             txtNombre.setText(alumno.getNombre());
-            txtGrado.setText(alumno.getGrado());
-            imgAlumno.setImageResource(alumno.getImg());
+            txtGrado.setText(alumno.getCarrera());
+            imgAlumno.setImageURI(Uri.parse(alumno.getImg()));
+            lblImagen.setText(alumno.getImg().toString());
+            btnEliminar.setEnabled(true);
         }
 
         imgAlumno.setOnClickListener(new View.OnClickListener() {
@@ -76,25 +78,27 @@ public class AlumnoAlta extends AppCompatActivity {
             public void onClick(View v) {
                 if (alumno == null) {
                     alumno = new Alumno();
-                    alumno.setGrado(txtGrado.getText().toString());
+                    alumno.setCarrera(txtGrado.getText().toString());
                     alumno.setMatricula(txtMatricula.getText().toString());
                     alumno.setNombre(txtNombre.getText().toString());
 
                     if (validar()) {
                         AlumnosDb alumnosDb = new AlumnosDb(getApplicationContext());
 
-                        if (selectedImageResource != 0) {
-                            alumno.setImg(selectedImageResource);
-                            Toast.makeText(getApplicationContext(), selectedImageResource, Toast.LENGTH_SHORT).show();
+                        if (selectedImagePath != null) {
+                            alumno.setImg(selectedImagePath);
+                            lblImagen.setText(selectedImagePath.toString());
                         }
+                        Aplicacion aplicacion = null;
+                        Toast.makeText(getApplicationContext(), "Creación del Alumno Exitoso", Toast.LENGTH_SHORT).show();
 
                         Aplicacion.alumnos.add(alumno);
                         alumnosDb.insertAlumno(alumno);
-
+                        aplicacion.Creacion();
                         setResult(Activity.RESULT_OK);
                         finish();
                     } else {
-                        Toast.makeText(getApplicationContext(), "Falto capturar datos", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Faltó capturar datos", Toast.LENGTH_SHORT).show();
                         txtMatricula.requestFocus();
                     }
                 }
@@ -102,16 +106,21 @@ public class AlumnoAlta extends AppCompatActivity {
                 if (posicion >= 0) {
                     alumno.setMatricula(txtMatricula.getText().toString());
                     alumno.setNombre(txtNombre.getText().toString());
-                    alumno.setGrado(txtGrado.getText().toString());
-                    lblImagen.setText(alumno.getImg());
+                    alumno.setCarrera(txtGrado.getText().toString());
+                    if (selectedImagePath != null) {
+                        alumno.setImg(selectedImagePath);
+                        lblImagen.setText(selectedImagePath.toString());
+                    }
+
                     Aplicacion.alumnos.get(posicion).setMatricula(alumno.getMatricula());
                     Aplicacion.alumnos.get(posicion).setNombre(alumno.getNombre());
-                    Aplicacion.alumnos.get(posicion).setGrado(alumno.getGrado());
-
+                    Aplicacion.alumnos.get(posicion).setCarrera(alumno.getCarrera());
+                    Aplicacion.alumnos.get(posicion).setImg(alumno.getImg());
                     AlumnosDb alumnosDba = new AlumnosDb(getApplicationContext());
                     alumnosDba.updateALumno(alumno);
+                    Toast.makeText(getApplicationContext(), "Modificación del Alumno Exitosa", Toast.LENGTH_SHORT).show();
 
-                    Toast.makeText(getApplicationContext(), "Se modifico con exito", Toast.LENGTH_SHORT).show();
+                    finish();
                 }
             }
         });
@@ -119,6 +128,7 @@ public class AlumnoAlta extends AppCompatActivity {
         btnEliminar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Aplicacion aplicacion = null;
                 AlumnosDb alumnosDba = new AlumnosDb(getApplicationContext());
                 alumno.setId(Aplicacion.alumnos.get(posicion).getId());
                 int id = alumno.getId();
@@ -128,9 +138,11 @@ public class AlumnoAlta extends AppCompatActivity {
                 builder.setPositiveButton("Sí", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        alumnosDba.deleteAlumnos(alumno.getId());
                         Aplicacion.alumnos.remove(posicion);
+                        alumnosDba.deleteAlumnos(alumno.getId());
                         Toast.makeText(getApplicationContext(), "Alumno eliminado", Toast.LENGTH_SHORT).show();
+
+                        aplicacion.Creacion();
                         setResult(Activity.RESULT_OK);
                         finish();
                     }
@@ -191,10 +203,9 @@ public class AlumnoAlta extends AppCompatActivity {
 
         if (requestCode == REQUEST_SELECT_IMAGE && resultCode == RESULT_OK && data != null) {
             Uri selectedImageUri = data.getData();
-            imgAlumno.setImageURI(selectedImageUri);
+            selectedImagePath = selectedImageUri.toString();
 
-            // Obtener el recurso de imagen correspondiente al recurso seleccionado de la galería
-            selectedImageResource = R.drawable.add; // Reemplaza esto con el recurso correcto que deseas asignar
+            imgAlumno.setImageURI(selectedImageUri);
         }
     }
 }

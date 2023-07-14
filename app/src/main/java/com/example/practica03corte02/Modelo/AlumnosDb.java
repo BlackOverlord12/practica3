@@ -45,7 +45,7 @@ public class AlumnosDb implements Persistencia, Proyeccion {
             ContentValues values = new ContentValues();
             values.put(DefineTabla.Alumnos.COLUMN_TABLE_MATRICULA, alumno.getMatricula());
             values.put(DefineTabla.Alumnos.COLUMN_TABLE_NOMBRE, alumno.getNombre());
-            values.put(DefineTabla.Alumnos.COLUMN_TABLE_CARRERA, alumno.getGrado());
+            values.put(DefineTabla.Alumnos.COLUMN_TABLE_CARRERA, alumno.getCarrera());
             values.put(DefineTabla.Alumnos.COLUMN_TABLE_FOTO, alumno.getImg());
             this.openDataBase();
             long num = db.insert(DefineTabla.Alumnos.TABLE_NAME, null,values);
@@ -61,7 +61,7 @@ public class AlumnosDb implements Persistencia, Proyeccion {
         ContentValues values = new ContentValues();
         values.put(DefineTabla.Alumnos.COLUMN_TABLE_MATRICULA, alumno.getMatricula());
         values.put(DefineTabla.Alumnos.COLUMN_TABLE_NOMBRE, alumno.getNombre());
-        values.put(DefineTabla.Alumnos.COLUMN_TABLE_CARRERA, alumno.getGrado());
+        values.put(DefineTabla.Alumnos.COLUMN_TABLE_CARRERA, alumno.getCarrera());
         values.put(DefineTabla.Alumnos.COLUMN_TABLE_FOTO, alumno.getImg());
         this.openDataBase();
         long num = db.update(
@@ -129,8 +129,8 @@ public class AlumnosDb implements Persistencia, Proyeccion {
             alumno.setId(cursor.getInt(0));
             alumno.setMatricula(cursor.getString(1));
             alumno.setNombre(cursor.getString(2));
-            alumno.setGrado(cursor.getString(3));
-            alumno.setImg(cursor.getInt(4));
+            alumno.setCarrera(cursor.getString(3));
+            alumno.setImg(String.valueOf(cursor.getInt(4)));
 
             return alumno;
         }

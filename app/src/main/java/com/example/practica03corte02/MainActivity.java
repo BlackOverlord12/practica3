@@ -1,10 +1,14 @@
 package com.example.practica03corte02;
 
+
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionButton fbtnAgregar;
     private Aplicacion app;
 
+    private MiAdaptador miAdaptador;
     private Alumno alumno;
     private int posicion = -1;
 
@@ -26,10 +31,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         Aplicacion app = (Aplicacion) getApplication();
-        recyclerView = (RecyclerView) findViewById(R.id.recId);
+        recyclerView = findViewById(R.id.recId);
         recyclerView.setAdapter(app.getAdaptor());
 
-        fbtnAgregar = (FloatingActionButton) findViewById(R.id.agregarAlumno);
+        fbtnAgregar = findViewById(R.id.agregarAlumno);
 
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
@@ -38,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 alumno = null;
-                Intent intent = new Intent( MainActivity.this, AlumnoAlta.class);
+                Intent intent = new Intent(MainActivity.this, AlumnoAlta.class);
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("alumno", alumno);
                 bundle.putInt("posicion", posicion);
@@ -48,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        miAdaptador = app.getAdaptor();  // Obtener el adaptador del RecyclerView
 
         app.getAdaptor().setOnClickListener(new View.OnClickListener() {
             @Override
@@ -55,9 +61,9 @@ public class MainActivity extends AppCompatActivity {
                 posicion = recyclerView.getChildAdapterPosition(v);
                 alumno = app.getAlumnos().get(posicion);
 
-                Intent intent = new Intent( MainActivity.this, AlumnoAlta.class);
+                Intent intent = new Intent(MainActivity.this, AlumnoAlta.class);
                 Bundle bundle = new Bundle();
-                bundle.putSerializable("alumno",alumno);
+                bundle.putSerializable("alumno", alumno);
                 intent.putExtra("posicion", posicion);
                 intent.putExtras(bundle);
 
@@ -65,12 +71,33 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent){
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
         recyclerView.getAdapter().notifyDataSetChanged();
         posicion = -1;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.searchview, menu);
+        MenuItem searchItem = menu.findItem(R.id.menu_search);
+        SearchView searchView = (SearchView) searchItem.getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                miAdaptador.getFilter().filter(newText);
+                return true;
+            }
+        });
+
+        return true;
     }
 }

@@ -34,8 +34,14 @@ public class Aplicacion extends Application {
 
 
 
+        Creacion();
+    }
+
+
+    public void Creacion()
+    {
         alumnosDb= new AlumnosDb(getApplicationContext());
-       // alumnos =Alumno.llenarAlumnos();
+        // alumnos =Alumno.llenarAlumnos();
         alumnos = alumnosDb.allAlumnos();
         alumnosDb.openDataBase();
 
@@ -43,5 +49,3 @@ public class Aplicacion extends Application {
         Log.d("", "onCreate: tamaño array list" + alumnos.size());
     }
 }
-
-
